@@ -7,7 +7,7 @@
     },
     "apidog": {
       "type": "http",
-      "url": "https://api.apidog.com/mcp",  // Or local if self-hosted
+      "url": "https://api.apidog.com/mcp",
       "headers": {"Authorization": "Bearer YOUR_APIDOG_TOKEN", "Project-ID": "YOUR_PROJECT_ID"}
     },
     "filesystem": {
