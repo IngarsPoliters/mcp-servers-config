@@ -1,0 +1,55 @@
+{
+  "mcpServers": {
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@composio/mcp@latest", "run", "--dir", "/home/coder/project/mcp-servers/github-mcp"]
+    },
+    "apidog": {
+      "type": "http",
+      "url": "https://api.apidog.com/mcp",  // Or local if self-hosted
+      "headers": {"Authorization": "Bearer YOUR_APIDOG_TOKEN", "Project-ID": "YOUR_PROJECT_ID"}
+    },
+    "filesystem": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/home/coder/project/mcp-servers/filesystem-mcp/server.js"]
+    },
+    "sequential-thinking": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "puppeteer": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/home/coder/project/mcp-servers/puppeteer-mcp/index.js"]
+    },
+    "postgres": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/home/coder/project/mcp-servers/postgres-mcp/server.js"],
+      "env": {"PG_CONNECTION_STRING": "your-db-string"}
+    },
+    "notion": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@composio/mcp@latest", "run", "--dir", "/home/coder/project/mcp-servers/notion-mcp"]
+    },
+    "memory-bank": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/home/coder/project/mcp-servers/memory-bank-mcp/server.js"]
+    },
+    "figma": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@composio/mcp@latest", "run", "--dir", "/home/coder/project/mcp-servers/figma-mcp"]
+    },
+    "zapier": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@composio/mcp@latest", "run", "--dir", "/home/coder/project/mcp-servers/zapier-mcp"]
+    }
+  }
+}
