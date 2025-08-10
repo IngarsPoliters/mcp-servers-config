@@ -1,0 +1,30 @@
+{
+  "name": "slack-mcp",
+  "version": "1.0.0",
+  "description": "Slack MCP server wrapper for team communication and workspace integration",
+  "main": "index.js",
+  "bin": {
+    "slack-mcp": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mcp",
+    "slack",
+    "team-communication",
+    "workspace",
+    "model-context-protocol",
+    "messaging",
+    "channels",
+    "direct-messages",
+    "collaboration"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "yargs": "^17.7.2"
+  }
+}

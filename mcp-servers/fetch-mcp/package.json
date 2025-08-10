@@ -1,0 +1,30 @@
+{
+  "name": "fetch-mcp",
+  "version": "1.0.0",
+  "description": "Fetch MCP server wrapper for the official web content fetching MCP server",
+  "main": "index.js",
+  "bin": {
+    "fetch-mcp": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mcp",
+    "fetch",
+    "web",
+    "content",
+    "model-context-protocol",
+    "http",
+    "scraping",
+    "markdown",
+    "html"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "yargs": "^17.7.2"
+  }
+}

@@ -16,10 +16,44 @@
         "FS_ROOT": "${PWD}"
       }
     },
-    "docker-hub-remote": {  // 2025 remote example: No local deps
+    "docker-hub-remote": {
       "type": "http",
       "url": "https://mcp.docker.com/hub",
       "oauth": true
+    },
+    "brave-search": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./mcp-servers/brave-search-mcp/index.js"],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      }
+    },
+    "fetch": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./mcp-servers/fetch-mcp/index.js"]
+    },
+    "everything": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./mcp-servers/everything-mcp/index.js"]
+    },
+    "notion": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./mcp-servers/notion-mcp/index.js"],
+      "env": {
+        "NOTION_TOKEN": "${NOTION_TOKEN}"
+      }
+    },
+    "slack": {
+      "type": "stdio",
+      "command": "node", 
+      "args": ["./mcp-servers/slack-mcp/index.js"],
+      "env": {
+        "SLACK_MCP_XOXP_TOKEN": "${SLACK_OAUTH_TOKEN}"
+      }
     }
   }
 }
