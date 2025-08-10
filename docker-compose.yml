@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  ide:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: code-server
+    restart: unless-stopped
+    volumes:
+      - shared-project:/home/coder/project  # Persistent shared dir
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}  # Pulled from Coolify env vars
+      - MCP_TIMEOUT=10000
+    ports:
+      - "80:8080"
+    labels:  # Your existing Traefik/Caddy labels
+      # (copy from your Coolify config)
+    networks:
+      - coolify
+
+volumes:
+  shared-project:  # Define as needed; map to host path in Coolify
+
+networks:
+  coolify:
+    external: true

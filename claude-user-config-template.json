@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "sentry-remote": {
+      "type": "http",
+      "url": "https://mcp.sentry.io",
+      "oauth": true
+    }
+  }
+}

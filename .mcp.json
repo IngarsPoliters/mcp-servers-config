@@ -3,53 +3,23 @@
     "github": {
       "type": "stdio",
       "command": "npx",
-      "args": ["@composio/mcp@latest", "run", "--dir", "/home/coder/project/mcp-servers-config/mcp-servers/github-mcp"]
-    },
-    "apidog": {
-      "type": "http",
-      "url": "https://api.apidog.com/mcp",
-      "headers": {"Authorization": "Bearer YOUR_APIDOG_TOKEN", "Project-ID": "YOUR_PROJECT_ID"}
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
     },
     "filesystem": {
       "type": "stdio",
-      "command": "node",
-      "args": ["/home/coder/project/mcp-servers-config/mcp-servers/filesystem-mcp/server.js"]
-    },
-    "sequential-thinking": {
-      "type": "stdio",
       "command": "npx",
-      "args": ["@modelcontextprotocol/server-sequential-thinking"]
+      "args": ["-y", "@modelcontextprotocol/server-filesystem"],
+      "env": {
+        "FS_ROOT": "${PWD}"
+      }
     },
-    "puppeteer": {
-      "type": "stdio",
-      "command": "node",
-      "args": ["/home/coder/project/mcp-servers-config/mcp-servers/puppeteer-mcp/index.js"]
-    },
-    "postgres": {
-      "type": "stdio",
-      "command": "node",
-      "args": ["/home/coder/project/mcp-servers-config/mcp-servers/postgres-mcp/server.js"],
-      "env": {"PG_CONNECTION_STRING": "your-db-string"}
-    },
-    "notion": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["@composio/mcp@latest", "run", "--dir", "/home/coder/project/mcp-servers-config/mcp-servers/notion-mcp"]
-    },
-    "memory-bank": {
-      "type": "stdio",
-      "command": "node",
-      "args": ["/home/coder/project/mcp-servers-config/mcp-servers/mcp-serversmemory-bank-mcp/server.js"]
-    },
-    "figma": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["@composio/mcp@latest", "run", "--dir", "/home/coder/project/mcp-servers-config/mcp-servers/figma-mcp"]
-    },
-    "zapier": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["@composio/mcp@latest", "run", "--dir", "/home/coder/project/mcp-servers-config/mcp-servers/zapier-mcp"]
+    "docker-hub-remote": {  // 2025 remote example: No local deps
+      "type": "http",
+      "url": "https://mcp.docker.com/hub",
+      "oauth": true
     }
   }
 }
