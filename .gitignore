@@ -1,3 +1,11 @@
 node_modules/
 .env
 *.log
+.env.local
+.env.development
+.env.production
+*.key
+*.pem
+.DS_Store
+*.tmp
+*.cache
