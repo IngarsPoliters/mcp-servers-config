@@ -37,12 +37,18 @@ jobs:
 
     - name: Install dependencies
       run: |
-        npm install
+        if [ -f "package.json" ]; then
+          npm install
+        fi
         pip install detect-secrets pre-commit
 
     - name: Run npm audit
       run: |
-        npm audit --audit-level=moderate
+        if [ -f "package.json" ]; then
+          npm audit --audit-level=moderate
+        else
+          echo "No package.json found, skipping npm audit"
+        fi
       continue-on-error: true
 
     - name: Run detect-secrets scan
