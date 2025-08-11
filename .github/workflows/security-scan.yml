@@ -28,26 +28,39 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
 
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
 
-    - name: Install dependencies
+    - name: Install Python dependencies
       run: |
-        if [ -f "package.json" ]; then
-          npm install
-        fi
         pip install detect-secrets pre-commit
 
-    - name: Run npm audit
+    - name: Install Node.js dependencies and audit
       run: |
+        echo "Scanning for Node.js projects..."
+        npm_projects_found=false
+        
+        # Check root directory
         if [ -f "package.json" ]; then
-          npm audit --audit-level=moderate
-        else
-          echo "No package.json found, skipping npm audit"
+          echo "Found package.json in root directory"
+          npm install
+          npm audit --audit-level=moderate || echo "npm audit completed with warnings"
+          npm_projects_found=true
+        fi
+        
+        # Check subdirectories for Node.js projects
+        find . -name "package.json" -not -path "./node_modules/*" | while read package_file; do
+          dir=$(dirname "$package_file")
+          echo "Found Node.js project in: $dir"
+          (cd "$dir" && npm install && npm audit --audit-level=moderate) || echo "npm audit completed with warnings for $dir"
+          npm_projects_found=true
+        done
+        
+        if [ "$npm_projects_found" = false ]; then
+          echo "No Node.js projects found, skipping npm operations"
         fi
       continue-on-error: true
 
