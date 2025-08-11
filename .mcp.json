@@ -11,9 +11,9 @@
     "filesystem": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem"],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/coder/project"],
       "env": {
-        "FS_ROOT": "${PWD}"
+        "FS_ROOT": "/home/coder/project"
       }
     },
     "docker-hub-remote": {
@@ -52,7 +52,33 @@
       "command": "node", 
       "args": ["./mcp-servers/slack-mcp/index.js"],
       "env": {
-        "SLACK_MCP_XOXP_TOKEN": "${SLACK_OAUTH_TOKEN}"
+        "SLACK_USER_TOKEN": "${SLACK_USER_TOKEN}"
+      }
+    },
+    "sequential-thinking": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./mcp-servers/sequential-thinking-mcp/index.js"]
+    },
+    "postgres": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./mcp-servers/postgres-mcp/index.js"],
+      "env": {
+        "DATABASE_URL": "${DATABASE_URL}"
+      }
+    },
+    "puppeteer": {
+      "type": "stdio", 
+      "command": "node",
+      "args": ["./mcp-servers/puppeteer-mcp/index.js"]
+    },
+    "memory-bank": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./mcp-servers/memory-bank-mcp/index.js"],
+      "env": {
+        "MEMORY_BANK_PATH": "${MEMORY_BANK_PATH}"
       }
     }
   }

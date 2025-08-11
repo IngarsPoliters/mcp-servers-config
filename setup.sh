@@ -88,9 +88,8 @@ fi
 echo "Verifying Claude Code installation..."
 claude doctor || echo "Claude doctor check completed with warnings"
 
-# Configure MCP servers from .mcp.json (project scope)
-echo "Configuring MCP servers from .mcp.json..."
-claude mcp add --json .mcp.json --scope project
+# MCP servers will be automatically loaded from .mcp.json in project directory
+echo "MCP servers configured via .mcp.json (automatic project-scoped loading)..."
 
 # Test setup
 echo "Testing MCP server configuration..."
