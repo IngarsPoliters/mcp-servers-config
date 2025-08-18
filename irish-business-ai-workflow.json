@@ -1,0 +1,445 @@
+{
+  "name": "Irish Business Data Scraper with AI Analysis",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [200, 200],
+      "parameters": {}
+    },
+    {
+      "id": "scrape-cro",
+      "name": "Scrape CRO Database",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [400, 200],
+      "parameters": {
+        "url": "https://services.cro.ie/cws/rest/search",
+        "method": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "=*"
+            },
+            {
+              "name": "type",
+              "value": "company"
+            },
+            {
+              "name": "limit",
+              "value": "100"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "User-Agent",
+              "value": "n8n-workflow/1.0"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "retry": {
+            "enabled": true,
+            "maxRetries": 3
+          }
+        }
+      }
+    },
+    {
+      "id": "extract-data",
+      "name": "Extract Business Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [600, 200],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "company_name",
+              "name": "company_name",
+              "value": "={{$json.companyName || 'Unknown Company'}}",
+              "type": "string"
+            },
+            {
+              "id": "company_number",
+              "name": "company_number", 
+              "value": "={{$json.companyNumber}}",
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "name": "status",
+              "value": "={{$json.companyStatus || 'Active'}}",
+              "type": "string"
+            },
+            {
+              "id": "address",
+              "name": "address",
+              "value": "={{$json.registeredAddress || 'Ireland'}}",
+              "type": "string"
+            },
+            {
+              "id": "incorporation_date",
+              "name": "incorporation_date",
+              "value": "={{$json.incorporationDate}}",
+              "type": "string"
+            },
+            {
+              "id": "industry",
+              "name": "industry",
+              "value": "={{$json.nature || 'General Business'}}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "split-batches",
+      "name": "Process in Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [800, 200],
+      "parameters": {
+        "batchSize": 10,
+        "options": {
+          "reset": false
+        }
+      }
+    },
+    {
+      "id": "sort-by-industry", 
+      "name": "Sort by Industry",
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [1000, 200],
+      "parameters": {
+        "type": "simple",
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "industry",
+              "order": "ascending"
+            },
+            {
+              "fieldName": "company_name", 
+              "order": "ascending"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ai-analysis",
+      "name": "AI Pain Point Analysis",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.1,
+      "position": [1200, 200],
+      "parameters": {
+        "resource": "chat",
+        "operation": "complete",
+        "prompt": {
+          "messages": [
+            {
+              "role": "system",
+              "content": "You are an AI business consultant specializing in Irish companies. Analyze the provided business data and suggest 3 practical, easy-to-implement AI improvements that are in high demand for 2025. Focus on: 1) AI chatbots for customer service, 2) Predictive analytics for operations, 3) Content generation for marketing. Be specific and actionable."
+            },
+            {
+              "role": "user", 
+              "content": "=Analyze this Irish business:\nCompany: {{$json.company_name}}\nIndustry: {{$json.industry}}\nLocation: {{$json.address}}\nStatus: {{$json.status}}\n\nProvide:\n1. Main pain points for this industry in Ireland\n2. 3 specific AI solutions with high ROI\n3. Implementation difficulty (Easy/Medium/Hard)\n4. Expected impact (Low/Medium/High)"
+            }
+          ]
+        },
+        "maxTokens": 500,
+        "temperature": 0.7,
+        "options": {
+          "maxRetries": 2
+        }
+      }
+    },
+    {
+      "id": "extract-ai-insights",
+      "name": "Structure AI Insights",  
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1400, 200],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ai_analysis",
+              "name": "ai_analysis",
+              "value": "={{$('AI Pain Point Analysis').item.json.choices[0].message.content}}",
+              "type": "string"
+            },
+            {
+              "id": "analysis_date",
+              "name": "analysis_date",
+              "value": "={{new Date().toISOString()}}",
+              "type": "string"
+            },
+            {
+              "id": "pain_points",
+              "name": "pain_points", 
+              "value": "=Industry-specific challenges identified by AI",
+              "type": "string"
+            },
+            {
+              "id": "ai_recommendations",
+              "name": "ai_recommendations",
+              "value": "=3 prioritized AI solutions with ROI focus",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "aggregate-results",
+      "name": "Combine Data & Analysis",
+      "type": "n8n-nodes-base.aggregate", 
+      "typeVersion": 1,
+      "position": [1600, 200],
+      "parameters": {
+        "aggregate": "aggregateIndividualFields",
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "company_name",
+              "renameField": false
+            },
+            {
+              "fieldToAggregate": "industry", 
+              "renameField": false
+            },
+            {
+              "fieldToAggregate": "address",
+              "renameField": false  
+            },
+            {
+              "fieldToAggregate": "ai_analysis",
+              "renameField": false
+            },
+            {
+              "fieldToAggregate": "analysis_date", 
+              "renameField": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "store-airtable",
+      "name": "Store in Airtable",
+      "type": "n8n-nodes-base.airtable", 
+      "typeVersion": 2.1,
+      "position": [1800, 200],
+      "parameters": {
+        "authentication": "airtableTokenApi",
+        "resource": "record",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "manual",
+          "value": "{{$env.AIRTABLE_BASE_ID}}"
+        },
+        "table": {
+          "__rl": true, 
+          "mode": "manual",
+          "value": "{{$env.AIRTABLE_TABLE_NAME}}"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            {
+              "field": "Company Name",
+              "type": "string"
+            },
+            {
+              "field": "Industry",
+              "type": "string" 
+            },
+            {
+              "field": "Location",
+              "type": "string"
+            },
+            {
+              "field": "AI Analysis",
+              "type": "string"
+            },
+            {
+              "field": "Analysis Date",
+              "type": "string"
+            },
+            {
+              "field": "Status", 
+              "type": "string"
+            }
+          ],
+          "schema": [
+            {
+              "id": "Company Name",
+              "displayName": "Company Name", 
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "success-notification",
+      "name": "Success Notification",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4, 
+      "position": [2000, 200],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "message",
+              "name": "message",
+              "value": "=Irish business data scraping completed successfully! {{$('Combine Data & Analysis').item.json.company_name.length}} companies analyzed and stored in Airtable.",
+              "type": "string"
+            },
+            {
+              "id": "timestamp",
+              "name": "timestamp", 
+              "value": "={{new Date().toISOString()}}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Scrape CRO Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape CRO Database": {
+      "main": [
+        [
+          {
+            "node": "Extract Business Data", 
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Business Data": {
+      "main": [
+        [
+          {
+            "node": "Process in Batches",
+            "type": "main", 
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process in Batches": {
+      "main": [
+        [
+          {
+            "node": "Sort by Industry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort by Industry": {
+      "main": [
+        [
+          {
+            "node": "AI Pain Point Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Pain Point Analysis": {
+      "main": [
+        [
+          {
+            "node": "Structure AI Insights",
+            "type": "main", 
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structure AI Insights": {
+      "main": [
+        [
+          {
+            "node": "Combine Data & Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Data & Analysis": {
+      "main": [
+        [
+          {
+            "node": "Store in Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store in Airtable": {
+      "main": [
+        [
+          {
+            "node": "Success Notification", 
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": {
+      "active": false
+    }
+  }
+}
