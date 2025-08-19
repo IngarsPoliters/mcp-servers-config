@@ -2,6 +2,7 @@
 
 # Add n8n-MCP to existing Claude Code configuration
 # This script adds n8n-mcp server to your current global MCP setup
+# Requires N8N_API_URL and N8N_API_KEY to be exported (e.g. via ~/.claude-mcp.env)
 
 set -e
 
@@ -43,6 +44,13 @@ if ! command -v jq &> /dev/null; then
     exit 1
 fi
 
+# Ensure required environment variables are set
+if [ -z "$N8N_API_URL" ] || [ -z "$N8N_API_KEY" ]; then
+    print_error "N8N_API_URL and N8N_API_KEY must be exported."
+    print_error "Add them to ~/.claude-mcp.env and run: source ~/.claude-mcp.env"
+    exit 1
+fi
+
 # Install n8n-mcp globally
 print_status "Installing n8n-mcp package globally..."
 npm install -g n8n-mcp
@@ -64,7 +72,8 @@ fi
 # Add n8n-mcp server configuration
 print_status "Adding n8n-mcp server to Claude configuration..."
 
-N8N_MCP_CONFIG='{
+N8N_MCP_CONFIG=$(cat <<EOF
+{
     "n8n-mcp": {
         "type": "stdio",
         "command": "npx",
@@ -73,11 +82,13 @@ N8N_MCP_CONFIG='{
             "MCP_MODE": "stdio",
             "LOG_LEVEL": "error",
             "DISABLE_CONSOLE_OUTPUT": "true",
-            "N8N_API_URL": "https://n8n.evolviqsphere.com",
-            "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNDNjMzFiNS03Yjg1LTQzMzAtYTdkNC1mM2VlZDk4ZWM0NWQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU0OTA2NzA5fQ.9H2KAgSamsIm3pBGNYmlB6-xFwF5TyIydlWESmkh7Y4"
+            "N8N_API_URL": "$N8N_API_URL",
+            "N8N_API_KEY": "$N8N_API_KEY"
         }
     }
-}'
+}
+EOF
+)
 
 # Merge the new server into existing configuration
 jq --argjson n8n_mcp "$N8N_MCP_CONFIG" '.mcpServers += $n8n_mcp' "$CLAUDE_CONFIG" > "$CLAUDE_CONFIG.tmp" && mv "$CLAUDE_CONFIG.tmp" "$CLAUDE_CONFIG"
