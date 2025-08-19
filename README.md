@@ -61,6 +61,7 @@ claude
 - [Compatibility](docs/compatibility.md)
 - [Security Best Practices](docs/security.md)
 - [Additional Resources](docs/additional-resources.md)
+- [Example Workflows](examples/README.md) *(placeholder data only)*
 - [Contributing](CONTRIBUTING.md)
 
 ## 📄 License

@@ -1,4 +1,5 @@
 {
+  "description": "Example workflow with placeholder data. Replace placeholders before use.",
   "name": "Irish Business Data Scraper with AI Analysis",
   "nodes": [
     {
