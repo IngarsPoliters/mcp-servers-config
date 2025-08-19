@@ -2,11 +2,7 @@
 
 # Add n8n-MCP to existing Claude Code configuration
 # This script adds n8n-mcp server to your current global MCP setup
-#
-# Usage:
-#   export N8N_API_URL="https://your-n8n-instance"
-#   export N8N_API_KEY="your-api-key"
-#   ./add-n8n-mcp.sh
+# Requires N8N_API_URL and N8N_API_KEY to be exported (e.g. via ~/.claude-mcp.env)
 
 set -e
 
@@ -50,10 +46,9 @@ fi
 
 # Ensure required environment variables are set
 if [ -z "$N8N_API_URL" ] || [ -z "$N8N_API_KEY" ]; then
-    print_error "N8N_API_URL and N8N_API_KEY must be set in the environment."
-    echo "Please export them before running:"
-    echo "  export N8N_API_URL=\"https://your-n8n-instance\""
-    echo "  export N8N_API_KEY=\"your-api-key\""
+    print_error "N8N_API_URL and N8N_API_KEY must be exported."
+    print_error "Add them to ~/.claude-mcp.env and run: source ~/.claude-mcp.env"
+
     exit 1
 fi
 
@@ -88,8 +83,6 @@ N8N_MCP_CONFIG=$(cat <<EOF
             "MCP_MODE": "stdio",
             "LOG_LEVEL": "error",
             "DISABLE_CONSOLE_OUTPUT": "true",
-            "N8N_API_URL": "${N8N_API_URL}",
-            "N8N_API_KEY": "${N8N_API_KEY}"
         }
     }
 }

@@ -32,13 +32,16 @@ Global MCP servers are available in **every Claude Code session**, regardless of
    ```bash
    # Edit the generated template
    nano ~/.claude-mcp.env
-   
+
    # Add your API keys:
    export GITHUB_TOKEN="ghp_your_token_here"
    export BRAVE_API_KEY="your_brave_key_here"
-   
+   export N8N_API_URL="https://your-n8n-instance.example"
+   export N8N_API_KEY="your_n8n_api_key"
+
    # Source it in your shell profile
    echo "source ~/.claude-mcp.env" >> ~/.bashrc
+   # add-n8n-mcp.sh expects N8N_API_URL and N8N_API_KEY to be set
    ```
 
 3. **Global servers are now available everywhere!**

@@ -37,6 +37,14 @@ claude
    nano .env
    ```
 
+   For n8n-MCP, add the following to your global environment file and source it before running scripts:
+   ```bash
+   echo 'export N8N_API_URL="https://your-n8n-instance.example"' >> ~/.claude-mcp.env
+   echo 'export N8N_API_KEY="your_n8n_api_key"' >> ~/.claude-mcp.env
+   source ~/.claude-mcp.env
+   ```
+   The `add-n8n-mcp.sh` helper assumes these variables are exported.
+
 4. **Run setup script**:
    ```bash
    chmod +x setup.sh
