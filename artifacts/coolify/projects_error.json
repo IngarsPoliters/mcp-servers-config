@@ -1,0 +1,6 @@
+{
+  "tool": "list_applications",
+  "params": {},
+  "error": "list_applications failed: {\"code\":-32603,\"message\":\"MCP error -32603: Coolify API error: connect ECONNREFUSED 127.0.1.1:443\"}",
+  "timestamp": "2025-08-19T01:07:09.016Z"
+}

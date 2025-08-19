@@ -1,0 +1,17 @@
+{
+  "tool_name": "health_check",
+  "endpoint_used": "https://31.97.56.185",
+  "package_version": "latest (0.1.13+)",
+  "ssl_verification": "disabled",
+  "exit_code": 0,
+  "timestamp": "2025-08-19T02:01:50.336Z",
+  "success": true,
+  "data": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Error checking Coolify health: Request failed with status code 503"
+      }
+    ]
+  }
+}

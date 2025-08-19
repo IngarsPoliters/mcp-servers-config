@@ -1,0 +1,42 @@
+{
+  "tools_tested": [
+    {
+      "name": "get_version",
+      "parameters": {},
+      "outputFile": "version.json",
+      "description": "Get Coolify version information"
+    },
+    {
+      "name": "health_check",
+      "parameters": {},
+      "outputFile": "health.json",
+      "description": "Check Coolify API health status"
+    },
+    {
+      "name": "list_applications",
+      "parameters": {},
+      "outputFile": "projects.json",
+      "description": "List all applications (projects) in Coolify"
+    },
+    {
+      "name": "list_servers",
+      "parameters": {},
+      "outputFile": "servers.json",
+      "description": "List all servers in Coolify instance"
+    }
+  ],
+  "endpoint_configuration": {
+    "base_url": "https://31.97.56.185",
+    "package_version": "latest (0.1.13+)",
+    "ssl_verification": "disabled",
+    "github_repo": "https://github.com/wrediam/coolify-mcp-server"
+  },
+  "test_summary": {
+    "total_tools": 4,
+    "timestamp": "2025-08-19T02:01:58.415Z",
+    "status": "API service unavailable (503)",
+    "notes": "Tools working correctly, Coolify API down"
+  },
+  "available_tools_count": 26,
+  "correction_note": "list_projects does not exist, use list_applications instead"
+}

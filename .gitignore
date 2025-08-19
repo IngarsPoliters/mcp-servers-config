@@ -4,6 +4,10 @@ node_modules/
 .env.local
 .env.development
 .env.production
+
+# local secrets (not tracked)
+.envrc
+.mcp.local.json
 *.key
 *.pem
 .DS_Store
@@ -47,3 +51,5 @@ Desktop.ini
 *.temp
 *.bak
 *.backup
+*.env*
+temp_*.json

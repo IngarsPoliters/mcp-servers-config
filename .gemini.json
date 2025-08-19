@@ -6,7 +6,9 @@
       "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": {
         "GITHUB_TOKEN": "${GITHUB_TOKEN}"
-      }
+      },
+      "cwd": "/home/coder/project/mcp-servers-config",
+      "timeout": 20000
     },
     "filesystem": {
       "type": "stdio",
@@ -14,12 +16,15 @@
       "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/coder/project"],
       "env": {
         "FS_ROOT": "/home/coder/project"
-      }
+      },
+      "cwd": "/home/coder/project/mcp-servers-config",
+      "timeout": 20000
     },
     "docker-hub-remote": {
       "type": "http",
       "url": "https://mcp.docker.com/hub",
-      "oauth": true
+      "oauth": true,
+      "timeout": 20000
     },
     "brave-search": {
       "type": "stdio",
@@ -27,17 +32,23 @@
       "args": ["./mcp-servers/brave-search-mcp/index.js"],
       "env": {
         "BRAVE_API_KEY": "${BRAVE_API_KEY}"
-      }
+      },
+      "cwd": "/home/coder/project/mcp-servers-config",
+      "timeout": 20000
     },
     "fetch": {
       "type": "stdio",
       "command": "node",
-      "args": ["./mcp-servers/fetch-mcp/index.js"]
+      "args": ["./mcp-servers/fetch-mcp/index.js"],
+      "cwd": "/home/coder/project/mcp-servers-config",
+      "timeout": 20000
     },
     "everything": {
       "type": "stdio",
       "command": "node",
-      "args": ["./mcp-servers/everything-mcp/index.js"]
+      "args": ["./mcp-servers/everything-mcp/index.js"],
+      "cwd": "/home/coder/project/mcp-servers-config",
+      "timeout": 20000
     },
     "notion": {
       "type": "stdio",
@@ -45,7 +56,9 @@
       "args": ["./mcp-servers/notion-mcp/index.js"],
       "env": {
         "NOTION_TOKEN": "${NOTION_TOKEN}"
-      }
+      },
+      "cwd": "/home/coder/project/mcp-servers-config",
+      "timeout": 20000
     },
     "slack": {
       "type": "stdio",
@@ -53,12 +66,16 @@
       "args": ["./mcp-servers/slack-mcp/index.js"],
       "env": {
         "SLACK_USER_TOKEN": "${SLACK_USER_TOKEN}"
-      }
+      },
+      "cwd": "/home/coder/project/mcp-servers-config",
+      "timeout": 20000
     },
     "sequential-thinking": {
       "type": "stdio",
       "command": "node",
-      "args": ["./mcp-servers/sequential-thinking-mcp/index.js"]
+      "args": ["./mcp-servers/sequential-thinking-mcp/index.js"],
+      "cwd": "/home/coder/project/mcp-servers-config",
+      "timeout": 20000
     },
     "postgres": {
       "type": "stdio",
@@ -66,12 +83,17 @@
       "args": ["./mcp-servers/postgres-mcp/index.js"],
       "env": {
         "DATABASE_URL": "${DATABASE_URL}"
-      }
+      },
+      "cwd": "/home/coder/project/mcp-servers-config",
+      "timeout": 20000,
+      "excludeTools": []
     },
     "puppeteer": {
       "type": "stdio", 
       "command": "node",
-      "args": ["./mcp-servers/puppeteer-mcp/index.js"]
+      "args": ["./mcp-servers/puppeteer-mcp/index.js"],
+      "cwd": "/home/coder/project/mcp-servers-config",
+      "timeout": 20000
     },
     "memory-bank": {
       "type": "stdio",
@@ -79,7 +101,9 @@
       "args": ["./mcp-servers/memory-bank-mcp/index.js"],
       "env": {
         "MEMORY_BANK_PATH": "${MEMORY_BANK_PATH}"
-      }
+      },
+      "cwd": "/home/coder/project/mcp-servers-config",
+      "timeout": 20000
     },
     "sourcegraph": {
       "type": "stdio",
@@ -88,21 +112,15 @@
       "env": {
         "SOURCEGRAPH_URL": "${SOURCEGRAPH_URL}",
         "SOURCEGRAPH_TOKEN": "${SOURCEGRAPH_TOKEN}"
-      }
+      },
+      "cwd": "/home/coder/project/mcp-servers-config",
+      "timeout": 20000
     },
     "docker": {
       "type": "stdio",
       "command": "node",
-      "args": ["./mcp-servers/docker-mcp/index.js"]
-    },
-    "coolify": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "coolify-mcp-server"],
-      "env": {
-        "COOLIFY_BASE_URL": "https://aironixlabs.com",
-        "COOLIFY_TOKEN": "${COOLIFY_TOKEN}"
-      },
+      "args": ["./mcp-servers/docker-mcp/index.js"],
+      "cwd": "/home/coder/project/mcp-servers-config",
       "timeout": 20000
     }
   }
