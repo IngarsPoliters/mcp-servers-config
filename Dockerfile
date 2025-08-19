@@ -1,7 +1,7 @@
 FROM codercom/code-server:latest  # Use your current image/tag from Coolify
 
 # Install Node.js, Claude Code CLI (supersedes your manual install), and utils
-RUN sudo apt-get update && sudo apt-get install -y nodejs npm tree \
+RUN apt-get update && apt-get install -y nodejs npm tree \
     && npm install -g @anthropic-ai/claude-code \
     && echo 'alias ll="ls -la"' >> /home/coder/.bashrc
 
