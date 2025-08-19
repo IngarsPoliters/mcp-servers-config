@@ -48,6 +48,7 @@ fi
 if [ -z "$N8N_API_URL" ] || [ -z "$N8N_API_KEY" ]; then
     print_error "N8N_API_URL and N8N_API_KEY must be exported."
     print_error "Add them to ~/.claude-mcp.env and run: source ~/.claude-mcp.env"
+
     exit 1
 fi
 
@@ -82,8 +83,6 @@ N8N_MCP_CONFIG=$(cat <<EOF
             "MCP_MODE": "stdio",
             "LOG_LEVEL": "error",
             "DISABLE_CONSOLE_OUTPUT": "true",
-            "N8N_API_URL": "$N8N_API_URL",
-            "N8N_API_KEY": "$N8N_API_KEY"
         }
     }
 }
