@@ -39,6 +39,7 @@ Based on usage data from Smithery.ai and community adoption:
 ### **One-Command Setup**
 ```bash
 git clone https://github.com/IngarsPoliters/mcp-servers-config.git && cd mcp-servers-config
+npm install
 ./setup.sh
 claude
 ```
@@ -52,26 +53,31 @@ That's it! Claude Code will start with all MCP servers configured and ready.
    cd mcp-servers-config
    ```
 
-2. **Configure environment** (optional):
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment** (optional):
    ```bash
    cp .env.template .env
    # Edit .env with your API keys (GitHub token, Notion token, etc.)
    nano .env
    ```
 
-3. **Run setup script**:
+4. **Run setup script**:
    ```bash
    chmod +x setup.sh
    ./setup.sh
    ```
 
-4. **Verify installation**:
+5. **Verify installation**:
    ```bash
    claude doctor
    claude mcp list
    ```
 
-5. **Start coding**:
+6. **Start coding**:
    ```bash
    claude
    ```

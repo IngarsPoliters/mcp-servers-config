@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "workspaces": ["mcp-servers/*"],
+  "devDependencies": {}
+}
