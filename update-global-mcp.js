@@ -2,11 +2,24 @@
 
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 // Load configurations
-const globalConfigPath = '/home/coder/.claude.json';
-const projectConfigPath = '/home/coder/project/mcp-servers-config/.mcp.json';
-const envPath = '/home/coder/project/mcp-servers-config/.env';
+const globalConfigPath = path.join(os.homedir(), '.claude.json');
+const projectConfigPath = path.join(process.cwd(), '.mcp.json');
+const envPath = path.join(process.cwd(), '.env');
+
+// Ensure required files exist
+function ensureExists(filePath, description) {
+    if (!fs.existsSync(filePath)) {
+        console.error(`❌ ${description} not found at ${filePath}`);
+        process.exit(1);
+    }
+}
+
+ensureExists(globalConfigPath, 'Global config');
+ensureExists(projectConfigPath, 'Project config');
+ensureExists(envPath, '.env file');
 
 console.log('🔧 Updating global Claude MCP configuration...');
 
