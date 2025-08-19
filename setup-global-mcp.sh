@@ -117,11 +117,11 @@ export GITHUB_TOKEN="your_github_token_here"
 export BRAVE_API_KEY="your_brave_api_key_here"
 
 # Firecrawl API Key (for advanced web scraping and crawling)
-export FIRECRAWL_API_KEY="fc-bac30db0109f4c91a9f94b0d8e9be0ba"
+export FIRECRAWL_API_KEY="your_firecrawl_api_key_here"
 
 # n8n API Configuration (for workflow management capabilities)
-export N8N_API_URL="https://n8n.evolviqsphere.com"
-export N8N_API_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNDNjMzFiNS03Yjg1LTQzMzAtYTdkNC1mM2VlZDk4ZWM0NWQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU0OTA2NzA5fQ.9H2KAgSamsIm3pBGNYmlB6-xFwF5TyIydlWESmkh7Y4"
+export N8N_API_URL="your_n8n_api_url_here"
+export N8N_API_KEY="your_n8n_api_key_here"
 
 # Memory Bank Path (for persistent memory)
 export MEMORY_BANK_PATH="$HOME/.claude/memory-bank"
