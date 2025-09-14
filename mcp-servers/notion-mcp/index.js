@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 
-const { spawn } = require('child_process');
-const yargs = require('yargs/yargs');
-const { hideBin } = require('yargs/helpers');
+const { spawn, parseArgs, launch } = require('../common/launcher');
 
 // Parse command line arguments
-const argv = yargs(hideBin(process.argv))
+const argv = parseArgs(yargs => yargs
   .option('token', {
     type: 'string',
     description: 'Notion integration token',
@@ -40,10 +38,7 @@ const argv = yargs(hideBin(process.argv))
     choices: ['npm', 'docker-official', 'docker-local'],
     default: 'npm',
     alias: 'm'
-  })
-  .help()
-  .alias('help', 'help')
-  .parse();
+  }));
 
 class NotionMCPProxy {
   constructor() {
@@ -145,8 +140,6 @@ class NotionMCPProxy {
       process.exit(1);
     }
 
-    console.error('Starting Notion MCP Server...');
-    
     let command, args, env;
     
     switch (method) {
@@ -198,48 +191,21 @@ class NotionMCPProxy {
         throw new Error(`Unsupported method: ${method}`);
     }
 
-    const server = spawn(command, args, {
-      stdio: ['inherit', 'inherit', 'inherit'],
-      env: env
-    });
-
-    // Handle graceful shutdown
-    process.on('SIGINT', () => {
-      console.error('Shutting down Notion MCP Server...');
-      server.kill('SIGTERM');
-      process.exit(0);
-    });
-
-    process.on('SIGTERM', () => {
-      console.error('Shutting down Notion MCP Server...');
-      server.kill('SIGTERM');
-      process.exit(0);
-    });
-
-    server.on('close', (code) => {
-      if (code !== 0 && code !== null) {
-        console.error(`Notion MCP Server exited with code ${code}`);
-        process.exit(code);
+    launch({
+      command,
+      args,
+      env,
+      name: 'Notion MCP Server',
+      onError: () => {
+        if (method === 'npm') {
+          console.error('Make sure npm/npx is installed and accessible in your PATH');
+        } else if (method.startsWith('docker')) {
+          console.error('Make sure Docker is installed and running');
+        }
       }
-    });
-
-    server.on('error', (error) => {
-      console.error('Error starting Notion MCP Server:', error.message);
-      if (method === 'npm') {
-        console.error('Make sure npm/npx is installed and accessible in your PATH');
-      } else if (method.startsWith('docker')) {
-        console.error('Make sure Docker is installed and running');
-      }
-      process.exit(1);
     });
   }
 }
-
-// Error handling
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled rejection at:', promise, 'reason:', reason);
-  process.exit(1);
-});
 
 // Start proxy server
 const proxy = new NotionMCPProxy();

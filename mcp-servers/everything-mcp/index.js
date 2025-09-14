@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 
-const { spawn } = require('child_process');
-const yargs = require('yargs/yargs');
-const { hideBin } = require('yargs/helpers');
+const { spawn, parseArgs, launch } = require('../common/launcher');
 
 // Parse command line arguments
-const argv = yargs(hideBin(process.argv))
+const argv = parseArgs(yargs => yargs
   .option('transport', {
     type: 'string',
     description: 'Transport type (stdio or http)',
@@ -30,10 +28,7 @@ const argv = yargs(hideBin(process.argv))
     description: 'Enable debug mode',
     default: false,
     alias: 'd'
-  })
-  .help()
-  .alias('help', 'help')
-  .parse();
+  }));
 
 class EverythingMCPProxy {
   constructor() {
@@ -64,8 +59,6 @@ class EverythingMCPProxy {
       process.exit(1);
     }
 
-    console.error('Starting Everything MCP Server (Reference/Test Server)...');
-    
     const args = ['-y', '@modelcontextprotocol/server-everything'];
     
     // Add transport-specific arguments if supported
@@ -90,45 +83,18 @@ class EverythingMCPProxy {
       env.MCP_HOST = this.host;
     }
 
-    const npx = spawn('npx', args, {
-      stdio: ['inherit', 'inherit', 'inherit'],
-      env: env
-    });
-
-    // Handle graceful shutdown
-    process.on('SIGINT', () => {
-      console.error('Shutting down Everything MCP Server...');
-      npx.kill('SIGTERM');
-      process.exit(0);
-    });
-
-    process.on('SIGTERM', () => {
-      console.error('Shutting down Everything MCP Server...');
-      npx.kill('SIGTERM');
-      process.exit(0);
-    });
-
-    npx.on('close', (code) => {
-      if (code !== 0 && code !== null) {
-        console.error(`Everything MCP Server exited with code ${code}`);
-        process.exit(code);
+    launch({
+      command: 'npx',
+      args,
+      env,
+      name: 'Everything MCP Server',
+      onError: () => {
+        console.error('Make sure npm/npx is installed and accessible in your PATH');
+        console.error('You can install the server directly with: npm i @modelcontextprotocol/server-everything');
       }
-    });
-
-    npx.on('error', (error) => {
-      console.error('Error starting Everything MCP Server:', error.message);
-      console.error('Make sure npm/npx is installed and accessible in your PATH');
-      console.error('You can install the server directly with: npm i @modelcontextprotocol/server-everything');
-      process.exit(1);
     });
   }
 }
-
-// Error handling
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled rejection at:', promise, 'reason:', reason);
-  process.exit(1);
-});
 
 // Start proxy server
 const proxy = new EverythingMCPProxy();
