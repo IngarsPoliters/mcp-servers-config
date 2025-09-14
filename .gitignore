@@ -53,3 +53,5 @@ Desktop.ini
 *.backup
 *.env*
 temp_*.json
+# Generated artifacts
+artifacts/
