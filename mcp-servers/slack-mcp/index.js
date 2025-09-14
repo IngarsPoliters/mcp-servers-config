@@ -1,82 +1,79 @@
 #!/usr/bin/env node
 
 const { spawn } = require('child_process');
-const yargs = require('yargs/yargs');
-const { hideBin } = require('yargs/helpers');
+const { parseArgs, launch } = require('../common/launcher');
 
-// Parse command line arguments
-const argv = yargs(hideBin(process.argv))
-  .option('xoxc-token', {
-    type: 'string',
-    description: 'Slack browser token (xoxc-...)',
-    alias: 'xoxc'
-  })
-  .option('xoxd-token', {
-    type: 'string',
-    description: 'Slack browser cookie d (xoxd-...)',
-    alias: 'xoxd'
-  })
-  .option('xoxp-token', {
-    type: 'string',
-    description: 'User OAuth token (xoxp-...) - alternative to xoxc/xoxd',
-    alias: 'xoxp'
-  })
-  .option('transport', {
-    type: 'string',
-    description: 'Transport mode (stdio or sse)',
-    choices: ['stdio', 'sse'],
-    default: 'stdio',
-    alias: 't'
-  })
-  .option('port', {
-    type: 'number',
-    description: 'Port for MCP server (for SSE transport)',
-    default: 13080,
-    alias: 'p'
-  })
-  .option('host', {
-    type: 'string',
-    description: 'Host for MCP server (for SSE transport)',
-    default: '127.0.0.1',
-    alias: 'h'
-  })
-  .option('sse-api-key', {
-    type: 'string',
-    description: 'Bearer token for SSE transport',
-    alias: 'key'
-  })
-  .option('proxy', {
-    type: 'string',
-    description: 'Proxy URL for outgoing requests',
-    alias: 'px'
-  })
-  .option('user-agent', {
-    type: 'string',
-    description: 'Custom User-Agent for Enterprise Slack environments',
-    alias: 'ua'
-  })
-  .option('enable-messaging', {
-    type: 'string',
-    description: 'Enable message posting (true for all, channel IDs comma-separated)',
-    alias: 'msg'
-  })
-  .option('log-level', {
-    type: 'string',
-    description: 'Log level (debug, info, warn, error)',
-    choices: ['debug', 'info', 'warn', 'error'],
-    default: 'info',
-    alias: 'log'
-  })
-  .option('implementation', {
-    type: 'string',
-    description: 'Slack MCP implementation to use',
-    choices: ['korotovsky', 'avimbu'],
-    default: 'korotovsky',
-    alias: 'impl'
-  })
-  .help()
-  .alias('help', 'help')
-  .parse();
+const argv = parseArgs((yargs) =>
+  yargs
+    .option('xoxc-token', {
+      type: 'string',
+      description: 'Slack browser token (xoxc-...)',
+      alias: 'xoxc'
+    })
+    .option('xoxd-token', {
+      type: 'string',
+      description: 'Slack browser cookie d (xoxd-...)',
+      alias: 'xoxd'
+    })
+    .option('xoxp-token', {
+      type: 'string',
+      description: 'User OAuth token (xoxp-...) - alternative to xoxc/xoxd',
+      alias: 'xoxp'
+    })
+    .option('transport', {
+      type: 'string',
+      description: 'Transport mode (stdio or sse)',
+      choices: ['stdio', 'sse'],
+      default: 'stdio',
+      alias: 't'
+    })
+    .option('port', {
+      type: 'number',
+      description: 'Port for MCP server (for SSE transport)',
+      default: 13080,
+      alias: 'p'
+    })
+    .option('host', {
+      type: 'string',
+      description: 'Host for MCP server (for SSE transport)',
+      default: '127.0.0.1',
+      alias: 'h'
+    })
+    .option('sse-api-key', {
+      type: 'string',
+      description: 'Bearer token for SSE transport',
+      alias: 'key'
+    })
+    .option('proxy', {
+      type: 'string',
+      description: 'Proxy URL for outgoing requests',
+      alias: 'px'
+    })
+    .option('user-agent', {
+      type: 'string',
+      description: 'Custom User-Agent for Enterprise Slack environments',
+      alias: 'ua'
+    })
+    .option('enable-messaging', {
+      type: 'string',
+      description: 'Enable message posting (true for all, channel IDs comma-separated)',
+      alias: 'msg'
+    })
+    .option('log-level', {
+      type: 'string',
+      description: 'Log level (debug, info, warn, error)',
+      choices: ['debug', 'info', 'warn', 'error'],
+      default: 'info',
+      alias: 'log'
+    })
+    .option('implementation', {
+      type: 'string',
+      description: 'Slack MCP implementation to use',
+      choices: ['korotovsky', 'avimbu'],
+      default: 'korotovsky',
+      alias: 'impl'
+    })
+);
 
 class SlackMCPProxy {
   constructor() {
@@ -120,7 +117,7 @@ class SlackMCPProxy {
 
   buildEnvironment() {
     const env = { ...process.env };
-    
+
     if (this.xoxcToken) env.SLACK_MCP_XOXC_TOKEN = this.xoxcToken;
     if (this.xoxdToken) env.SLACK_MCP_XOXD_TOKEN = this.xoxdToken;
     if (this.xoxpToken) env.SLACK_MCP_XOXP_TOKEN = this.xoxpToken;
@@ -131,7 +128,7 @@ class SlackMCPProxy {
     if (this.userAgent) env.SLACK_MCP_USER_AGENT = this.userAgent;
     if (this.enableMessaging) env.SLACK_MCP_ADD_MESSAGE_TOOL = this.enableMessaging;
     if (this.logLevel) env.SLACK_MCP_LOG_LEVEL = this.logLevel;
-    
+
     return env;
   }
 
@@ -144,16 +141,15 @@ class SlackMCPProxy {
     console.error('Cloning and building korotovsky/slack-mcp-server...');
     console.error('This may take a moment on first run.');
 
-    // Clone the repository if it doesn't exist
     const cloneProcess = spawn('git', [
-      'clone', 
+      'clone',
       'https://github.com/korotovsky/slack-mcp-server.git',
       '/tmp/slack-mcp-server'
     ], { stdio: 'pipe' });
 
     await new Promise((resolve, reject) => {
       cloneProcess.on('close', (code) => {
-        if (code === 0 || code === 128) { // 128 = already exists
+        if (code === 0 || code === 128) {
           resolve();
         } else {
           reject(new Error(`Failed to clone repository. Exit code: ${code}`));
@@ -162,22 +158,19 @@ class SlackMCPProxy {
       cloneProcess.on('error', reject);
     });
 
-    // Build and run the server
     const args = ['run', '/tmp/slack-mcp-server/mcp/mcp-server.go'];
-    
+
     if (this.transport === 'sse') {
       args.push('--transport', 'sse');
     } else {
       args.push('--transport', 'stdio');
     }
 
-    const server = spawn('go', args, {
-      stdio: ['inherit', 'inherit', 'inherit'],
+    launch('go', args, {
       env: this.buildEnvironment(),
-      cwd: '/tmp/slack-mcp-server'
+      spawnOptions: { cwd: '/tmp/slack-mcp-server' },
+      serverName: 'Slack MCP Server'
     });
-
-    return server;
   }
 
   async runAvimbu() {
@@ -187,17 +180,14 @@ class SlackMCPProxy {
     }
 
     console.error('Using AVIMBU/slack-mcp-server implementation...');
-    
-    const server = spawn('npx', ['-y', 'slack-mcp-server'], {
-      stdio: ['inherit', 'inherit', 'inherit'],
-      env: this.buildEnvironment()
-    });
 
-    return server;
+    launch('npx', ['-y', 'slack-mcp-server'], {
+      env: this.buildEnvironment(),
+      serverName: 'Slack MCP Server'
+    });
   }
 
   async run() {
-    // Validate authentication tokens
     if (!this.xoxpToken && (!this.xoxcToken || !this.xoxdToken)) {
       console.error('Error: Slack authentication tokens are required.');
       console.error('');
@@ -211,7 +201,7 @@ class SlackMCPProxy {
     }
 
     console.error(`Starting Slack MCP Server (${this.implementation} implementation)...`);
-    
+
     if (this.transport === 'sse') {
       console.error(`SSE transport mode on ${this.host}:${this.port}`);
       if (this.sseApiKey) {
@@ -219,52 +209,19 @@ class SlackMCPProxy {
       }
     }
 
-    let server;
     try {
       if (this.implementation === 'korotovsky') {
-        server = await this.runKorotovsky();
+        await this.runKorotovsky();
       } else {
-        server = await this.runAvimbu();
+        await this.runAvimbu();
       }
     } catch (error) {
       console.error('Error starting Slack MCP Server:', error.message);
       process.exit(1);
     }
-
-    // Handle graceful shutdown
-    process.on('SIGINT', () => {
-      console.error('Shutting down Slack MCP Server...');
-      server.kill('SIGTERM');
-      process.exit(0);
-    });
-
-    process.on('SIGTERM', () => {
-      console.error('Shutting down Slack MCP Server...');
-      server.kill('SIGTERM');
-      process.exit(0);
-    });
-
-    server.on('close', (code) => {
-      if (code !== 0 && code !== null) {
-        console.error(`Slack MCP Server exited with code ${code}`);
-        process.exit(code);
-      }
-    });
-
-    server.on('error', (error) => {
-      console.error('Error running Slack MCP Server:', error.message);
-      process.exit(1);
-    });
   }
 }
 
-// Error handling
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled rejection at:', promise, 'reason:', reason);
-  process.exit(1);
-});
-
-// Start proxy server
 const proxy = new SlackMCPProxy();
 proxy.run().catch((error) => {
   console.error('Failed to start Slack MCP proxy:', error.message);

@@ -1,49 +1,46 @@
 #!/usr/bin/env node
 
 const { spawn } = require('child_process');
-const yargs = require('yargs/yargs');
-const { hideBin } = require('yargs/helpers');
+const { parseArgs, launch } = require('../common/launcher');
 
-// Parse command line arguments
-const argv = yargs(hideBin(process.argv))
-  .option('token', {
-    type: 'string',
-    description: 'Notion integration token',
-    alias: 't'
-  })
-  .option('transport', {
-    type: 'string',
-    description: 'Transport mode (stdio or http)',
-    choices: ['stdio', 'http'],
-    default: 'stdio',
-    alias: 'tr'
-  })
-  .option('port', {
-    type: 'number',
-    description: 'HTTP server port (when using http transport)',
-    default: 3000,
-    alias: 'p'
-  })
-  .option('auth-token', {
-    type: 'string',
-    description: 'HTTP auth token (when using http transport)',
-    alias: 'auth'
-  })
-  .option('headers', {
-    type: 'string',
-    description: 'Custom headers as JSON string (advanced use)',
-    alias: 'h'
-  })
-  .option('method', {
-    type: 'string',
-    description: 'Installation method (npm, docker-official, docker-local)',
-    choices: ['npm', 'docker-official', 'docker-local'],
-    default: 'npm',
-    alias: 'm'
-  })
-  .help()
-  .alias('help', 'help')
-  .parse();
+const argv = parseArgs((yargs) =>
+  yargs
+    .option('token', {
+      type: 'string',
+      description: 'Notion integration token',
+      alias: 't'
+    })
+    .option('transport', {
+      type: 'string',
+      description: 'Transport mode (stdio or http)',
+      choices: ['stdio', 'http'],
+      default: 'stdio',
+      alias: 'tr'
+    })
+    .option('port', {
+      type: 'number',
+      description: 'HTTP server port (when using http transport)',
+      default: 3000,
+      alias: 'p'
+    })
+    .option('auth-token', {
+      type: 'string',
+      description: 'HTTP auth token (when using http transport)',
+      alias: 'auth'
+    })
+    .option('headers', {
+      type: 'string',
+      description: 'Custom headers as JSON string (advanced use)',
+      alias: 'h'
+    })
+    .option('method', {
+      type: 'string',
+      description: 'Installation method (npm, docker-official, docker-local)',
+      choices: ['npm', 'docker-official', 'docker-local'],
+      default: 'npm',
+      alias: 'm'
+    })
+);
 
 class NotionMCPProxy {
   constructor() {
@@ -58,8 +55,8 @@ class NotionMCPProxy {
   async checkMethodAvailability(method) {
     return new Promise((resolve) => {
       const command = method.startsWith('docker') ? 'docker' : 'npx';
-      const args = method.startsWith('docker') ? ['--version'] : ['--version'];
-      
+      const args = ['--version'];
+
       const process = spawn(command, args, { stdio: 'pipe' });
       process.on('close', (code) => {
         resolve(code === 0);
@@ -72,7 +69,7 @@ class NotionMCPProxy {
 
   async findAvailableMethod() {
     const methods = ['npm', 'docker-official', 'docker-local'];
-    
+
     for (const method of methods) {
       const available = await this.checkMethodAvailability(method);
       if (available) {
@@ -80,59 +77,57 @@ class NotionMCPProxy {
         return method;
       }
     }
-    
+
     throw new Error('None of the required tools (npx, docker) are available');
   }
 
   buildEnv() {
     const env = { ...process.env };
-    
+
     if (this.token) {
       env.NOTION_TOKEN = this.token;
     }
-    
+
     if (this.headers) {
       env.OPENAPI_MCP_HEADERS = this.headers;
     }
-    
+
     if (this.authToken && this.transport === 'http') {
       env.AUTH_TOKEN = this.authToken;
     }
-    
+
     return env;
   }
 
   buildArgs() {
     const args = [];
-    
+
     if (this.transport === 'http') {
       args.push('--transport', 'http');
-      
+
       if (this.port !== 3000) {
         args.push('--port', this.port.toString());
       }
-      
+
       if (this.authToken) {
         args.push('--auth-token', this.authToken);
       }
     } else {
       args.push('--transport', 'stdio');
     }
-    
+
     return args;
   }
 
   async run() {
     let method = this.method;
-    
-    // Check if the preferred method is available, otherwise find an available one
+
     const methodAvailable = await this.checkMethodAvailability(method);
     if (!methodAvailable) {
       console.error(`Warning: Preferred method '${method}' is not available, searching for alternatives...`);
       method = await this.findAvailableMethod();
     }
 
-    // Validate token
     if (!this.token && !this.headers) {
       console.error('Error: Notion integration token is required.');
       console.error('Set NOTION_TOKEN environment variable or use --token flag');
@@ -146,21 +141,20 @@ class NotionMCPProxy {
     }
 
     console.error('Starting Notion MCP Server...');
-    
+
     let command, args, env;
-    
+
     switch (method) {
       case 'npm':
         command = 'npx';
         args = ['-y', '@notionhq/notion-mcp-server', ...this.buildArgs()];
         env = this.buildEnv();
         break;
-        
+
       case 'docker-official':
         command = 'docker';
         args = ['run', '--rm', '-i'];
-        
-        // Add environment variables for Docker
+
         if (this.token) {
           args.push('-e', 'NOTION_TOKEN');
         }
@@ -170,16 +164,15 @@ class NotionMCPProxy {
         if (this.authToken && this.transport === 'http') {
           args.push('-e', 'AUTH_TOKEN');
         }
-        
+
         args.push('mcp/notion', ...this.buildArgs());
         env = this.buildEnv();
         break;
-        
+
       case 'docker-local':
         command = 'docker';
         args = ['run', '--rm', '-i'];
-        
-        // Add environment variables
+
         if (this.token) {
           args.push('-e', `NOTION_TOKEN=${this.token}`);
         }
@@ -189,59 +182,30 @@ class NotionMCPProxy {
         if (this.authToken && this.transport === 'http') {
           args.push('-e', `AUTH_TOKEN=${this.authToken}`);
         }
-        
+
         args.push('notion-mcp-server', ...this.buildArgs());
         env = process.env;
         break;
-        
+
       default:
         throw new Error(`Unsupported method: ${method}`);
     }
 
-    const server = spawn(command, args, {
-      stdio: ['inherit', 'inherit', 'inherit'],
-      env: env
-    });
-
-    // Handle graceful shutdown
-    process.on('SIGINT', () => {
-      console.error('Shutting down Notion MCP Server...');
-      server.kill('SIGTERM');
-      process.exit(0);
-    });
-
-    process.on('SIGTERM', () => {
-      console.error('Shutting down Notion MCP Server...');
-      server.kill('SIGTERM');
-      process.exit(0);
-    });
-
-    server.on('close', (code) => {
-      if (code !== 0 && code !== null) {
-        console.error(`Notion MCP Server exited with code ${code}`);
-        process.exit(code);
+    launch(command, args, {
+      env,
+      serverName: 'Notion MCP Server',
+      onError: (error) => {
+        console.error('Error starting Notion MCP Server:', error.message);
+        if (method === 'npm') {
+          console.error('Make sure npm/npx is installed and accessible in your PATH');
+        } else if (method.startsWith('docker')) {
+          console.error('Make sure Docker is installed and running');
+        }
       }
-    });
-
-    server.on('error', (error) => {
-      console.error('Error starting Notion MCP Server:', error.message);
-      if (method === 'npm') {
-        console.error('Make sure npm/npx is installed and accessible in your PATH');
-      } else if (method.startsWith('docker')) {
-        console.error('Make sure Docker is installed and running');
-      }
-      process.exit(1);
     });
   }
 }
 
-// Error handling
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled rejection at:', promise, 'reason:', reason);
-  process.exit(1);
-});
-
-// Start proxy server
 const proxy = new NotionMCPProxy();
 proxy.run().catch((error) => {
   console.error('Failed to start Notion MCP proxy:', error.message);
