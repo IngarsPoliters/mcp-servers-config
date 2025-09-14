@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "@composio/mcp": "^1.0.9"
+  },
+  "scripts": {
+    "test": "jest"
   }
 }
