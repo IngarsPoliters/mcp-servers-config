@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 
-const { spawn } = require('child_process');
-const yargs = require('yargs/yargs');
-const { hideBin } = require('yargs/helpers');
+const { spawn, parseArgs, launch } = require('../common/launcher');
 
 // Parse command line arguments
-const argv = yargs(hideBin(process.argv))
+const argv = parseArgs(yargs => yargs
   .option('token', {
     type: 'string',
     description: 'GitHub Personal Access Token',
@@ -16,10 +14,7 @@ const argv = yargs(hideBin(process.argv))
     description: 'GitHub MCP Docker image',
     default: 'ghcr.io/github/github-mcp-server',
     alias: 'i'
-  })
-  .help()
-  .alias('help', 'h')
-  .parse();
+  }));
 
 class GitHubMCPProxy {
   constructor() {
@@ -95,9 +90,6 @@ class GitHubMCPProxy {
       console.error('Continuing with existing image...');
     }
 
-    // Start the GitHub MCP server in Docker
-    console.error('Starting GitHub MCP Server...');
-    
     const dockerArgs = [
       'run',
       '-i',
@@ -106,42 +98,13 @@ class GitHubMCPProxy {
       this.dockerImage
     ];
 
-    const docker = spawn('docker', dockerArgs, {
-      stdio: ['inherit', 'inherit', 'inherit']
-    });
-
-    // Handle graceful shutdown
-    process.on('SIGINT', () => {
-      console.error('Shutting down GitHub MCP Server...');
-      docker.kill('SIGTERM');
-      process.exit(0);
-    });
-
-    process.on('SIGTERM', () => {
-      console.error('Shutting down GitHub MCP Server...');
-      docker.kill('SIGTERM');
-      process.exit(0);
-    });
-
-    docker.on('close', (code) => {
-      if (code !== 0 && code !== null) {
-        console.error(`GitHub MCP Server exited with code ${code}`);
-        process.exit(code);
-      }
-    });
-
-    docker.on('error', (error) => {
-      console.error('Error starting GitHub MCP Server:', error.message);
-      process.exit(1);
+    launch({
+      command: 'docker',
+      args: dockerArgs,
+      name: 'GitHub MCP Server'
     });
   }
 }
-
-// Error handling
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled rejection at:', promise, 'reason:', reason);
-  process.exit(1);
-});
 
 // Start proxy server
 const proxy = new GitHubMCPProxy();

@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 
-const { spawn } = require('child_process');
-const yargs = require('yargs/yargs');
-const { hideBin } = require('yargs/helpers');
+const { spawn, parseArgs, launch } = require('../common/launcher');
 
 // Parse command line arguments
-const argv = yargs(hideBin(process.argv))
+const argv = parseArgs(yargs => yargs
   .option('ignore-robots-txt', {
     type: 'boolean',
     description: 'Ignore robots.txt restrictions',
@@ -32,10 +30,7 @@ const argv = yargs(hideBin(process.argv))
     choices: ['uvx', 'docker', 'npx'],
     default: 'uvx',
     alias: 'm'
-  })
-  .help()
-  .alias('help', 'h')
-  .parse();
+  }));
 
 class FetchMCPProxy {
   constructor() {
@@ -107,8 +102,6 @@ class FetchMCPProxy {
       method = await this.findAvailableMethod();
     }
 
-    console.error('Starting Fetch MCP Server...');
-    
     let command, args, env;
     
     switch (method) {
@@ -147,47 +140,20 @@ class FetchMCPProxy {
         throw new Error(`Unsupported method: ${method}`);
     }
 
-    const server = spawn(command, args, {
-      stdio: ['inherit', 'inherit', 'inherit'],
-      env: env
-    });
-
-    // Handle graceful shutdown
-    process.on('SIGINT', () => {
-      console.error('Shutting down Fetch MCP Server...');
-      server.kill('SIGTERM');
-      process.exit(0);
-    });
-
-    process.on('SIGTERM', () => {
-      console.error('Shutting down Fetch MCP Server...');
-      server.kill('SIGTERM');
-      process.exit(0);
-    });
-
-    server.on('close', (code) => {
-      if (code !== 0 && code !== null) {
-        console.error(`Fetch MCP Server exited with code ${code}`);
-        process.exit(code);
+    launch({
+      command,
+      args,
+      env,
+      name: 'Fetch MCP Server',
+      onError: () => {
+        console.error('Please ensure the required tools are installed:');
+        console.error('- For uvx: pip install uv');
+        console.error('- For docker: https://docs.docker.com/get-docker/');
+        console.error('- For npx: npm install -g npm');
       }
-    });
-
-    server.on('error', (error) => {
-      console.error('Error starting Fetch MCP Server:', error.message);
-      console.error('Please ensure the required tools are installed:');
-      console.error('- For uvx: pip install uv');
-      console.error('- For docker: https://docs.docker.com/get-docker/');
-      console.error('- For npx: npm install -g npm');
-      process.exit(1);
     });
   }
 }
-
-// Error handling
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled rejection at:', promise, 'reason:', reason);
-  process.exit(1);
-});
 
 // Start proxy server
 const proxy = new FetchMCPProxy();

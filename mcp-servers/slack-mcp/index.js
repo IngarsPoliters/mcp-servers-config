@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 
-const { spawn } = require('child_process');
-const yargs = require('yargs/yargs');
-const { hideBin } = require('yargs/helpers');
+const { spawn, parseArgs, launch } = require('../common/launcher');
 
 // Parse command line arguments
-const argv = yargs(hideBin(process.argv))
+const argv = parseArgs(yargs => yargs
   .option('xoxc-token', {
     type: 'string',
     description: 'Slack browser token (xoxc-...)',
@@ -73,10 +71,7 @@ const argv = yargs(hideBin(process.argv))
     choices: ['korotovsky', 'avimbu'],
     default: 'korotovsky',
     alias: 'impl'
-  })
-  .help()
-  .alias('help', 'help')
-  .parse();
+  }));
 
 class SlackMCPProxy {
   constructor() {
@@ -171,13 +166,13 @@ class SlackMCPProxy {
       args.push('--transport', 'stdio');
     }
 
-    const server = spawn('go', args, {
-      stdio: ['inherit', 'inherit', 'inherit'],
+    return launch({
+      command: 'go',
+      args,
       env: this.buildEnvironment(),
-      cwd: '/tmp/slack-mcp-server'
+      cwd: '/tmp/slack-mcp-server',
+      name: `Slack MCP Server (${this.implementation} implementation)`
     });
-
-    return server;
   }
 
   async runAvimbu() {
@@ -188,12 +183,12 @@ class SlackMCPProxy {
 
     console.error('Using AVIMBU/slack-mcp-server implementation...');
     
-    const server = spawn('npx', ['-y', 'slack-mcp-server'], {
-      stdio: ['inherit', 'inherit', 'inherit'],
-      env: this.buildEnvironment()
+    return launch({
+      command: 'npx',
+      args: ['-y', 'slack-mcp-server'],
+      env: this.buildEnvironment(),
+      name: `Slack MCP Server (${this.implementation} implementation)`
     });
-
-    return server;
   }
 
   async run() {
@@ -210,8 +205,6 @@ class SlackMCPProxy {
       process.exit(1);
     }
 
-    console.error(`Starting Slack MCP Server (${this.implementation} implementation)...`);
-    
     if (this.transport === 'sse') {
       console.error(`SSE transport mode on ${this.host}:${this.port}`);
       if (this.sseApiKey) {
@@ -219,50 +212,18 @@ class SlackMCPProxy {
       }
     }
 
-    let server;
     try {
       if (this.implementation === 'korotovsky') {
-        server = await this.runKorotovsky();
+        await this.runKorotovsky();
       } else {
-        server = await this.runAvimbu();
+        await this.runAvimbu();
       }
     } catch (error) {
       console.error('Error starting Slack MCP Server:', error.message);
       process.exit(1);
     }
-
-    // Handle graceful shutdown
-    process.on('SIGINT', () => {
-      console.error('Shutting down Slack MCP Server...');
-      server.kill('SIGTERM');
-      process.exit(0);
-    });
-
-    process.on('SIGTERM', () => {
-      console.error('Shutting down Slack MCP Server...');
-      server.kill('SIGTERM');
-      process.exit(0);
-    });
-
-    server.on('close', (code) => {
-      if (code !== 0 && code !== null) {
-        console.error(`Slack MCP Server exited with code ${code}`);
-        process.exit(code);
-      }
-    });
-
-    server.on('error', (error) => {
-      console.error('Error running Slack MCP Server:', error.message);
-      process.exit(1);
-    });
   }
 }
-
-// Error handling
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled rejection at:', promise, 'reason:', reason);
-  process.exit(1);
-});
 
 // Start proxy server
 const proxy = new SlackMCPProxy();
